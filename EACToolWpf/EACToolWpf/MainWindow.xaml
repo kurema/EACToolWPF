@@ -4,9 +4,35 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EACToolWpf"
-        mc:Ignorable="d"
+        mc:Ignorable="d" x:Name="WindowTop"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <TabControl>
+        <TabItem Header="画像">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-    </Grid>
+                <Image Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" DragDrop.DragLeave="Image_DragLeave"/>
+
+                <TextBox Grid.Row="1" Grid.Column="0" KeyDown="TextBox_KeyDown" />
+                <Button Grid.Row="1" Grid.Column="1" Content="更新" Click="Button_Click" />
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                    <Button Content="保存" />
+                    <Button Content="Img作成" Click="Button_Click_CreateImg" />
+                    <Button Content="ダウンロードを開く" Click="Button_Click_OpenDownload" />
+                </StackPanel>
+            </Grid>
+        </TabItem>
+        <TabItem Header="トラック一覧">
+
+        </TabItem>
+    </TabControl>
 </Window>

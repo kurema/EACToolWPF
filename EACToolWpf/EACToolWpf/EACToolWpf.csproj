@@ -8,4 +8,9 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Vanara.Core" Version="3.4.17" />
+    <PackageReference Include="Vanara.PInvoke.Shell32" Version="3.4.17" />
+  </ItemGroup>
+
 </Project>
