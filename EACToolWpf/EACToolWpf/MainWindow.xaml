@@ -19,14 +19,14 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Image Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" DragDrop.DragLeave="Image_DragLeave"/>
+                <Image x:Name="ImagePreview" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MouseMove="ImagePreview_MouseMove" />
 
-                <TextBox Grid.Row="1" Grid.Column="0" KeyDown="TextBox_KeyDown" />
+                <TextBox x:Name="TextBoxImageUrl" Grid.Row="1" Grid.Column="0" KeyDown="TextBox_KeyDown" />
                 <Button Grid.Row="1" Grid.Column="1" Content="更新" Click="Button_Click" />
 
                 <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
-                    <Button Content="保存" />
-                    <Button Content="Img作成" Click="Button_Click_CreateImg" />
+                    <Button Content="保存" Click="Button_Click_SaveImage" />
+                    <Button Content="Img保存" Click="Button_Click_CreateImg" />
                     <Button Content="ダウンロードを開く" Click="Button_Click_OpenDownload" />
                 </StackPanel>
             </Grid>
