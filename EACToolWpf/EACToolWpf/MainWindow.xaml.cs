@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static Vanara.PInvoke.OleAut32.PICTDESC.PICTDEC_UNION;
 
 namespace EACToolWpf
 {
@@ -23,9 +22,16 @@ namespace EACToolWpf
 	{
 		private static readonly HttpClient httpClient = new();
 
+		public RegexEntry[] RegexEntries { get; set; } = [
+			new RegexEntry(@"^(\d+)[\s\t]*[\.．]?[\s\t]*",""),
+			new RegexEntry(@"[\s\t]*$",""),
+			new RegexEntry(@"\(\d+\)","\n"),
+		];
+
 		public MainWindow()
 		{
 			InitializeComponent();
+			CurrentTempPath = System.IO.Path.GetTempFileName() + ".jpeg";
 		}
 
 		private async void TextBox_KeyDown(object sender, KeyEventArgs e)
@@ -91,7 +97,6 @@ namespace EACToolWpf
 					"image/tiff" => ".tiff",
 					_ => ".unknown",
 				};
-				CurrentTempPath = System.IO.Path.GetTempFileName() + ".jpeg";
 				await File.WriteAllBytesAsync(CurrentTempPath, CurrentImageJpeg ?? CurrentImageRaw);
 
 
@@ -171,10 +176,85 @@ namespace EACToolWpf
 			if (CurrentTempPath is null) return;
 			var img = sender as Image;
 			if (img is null || e.LeftButton != MouseButtonState.Pressed) return;
-			//using MemoryStream ms = new MemoryStream(CurrentImageJpeg ?? CurrentImageRaw);
 			var dataobject = new DataObject(DataFormats.FileDrop, new[] { CurrentTempPath });
-			//dataobject.SetImage(BitmapFrame.Create(ms, BitmapCreateOptions.None, BitmapCacheOption.OnLoad));
 			DragDrop.DoDragDrop(img, dataobject, DragDropEffects.Copy);
+		}
+
+		private void WindowTop_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			if (CurrentTempPath is not null && System.IO.File.Exists(CurrentTempPath)) File.Delete(CurrentTempPath);
+		}
+
+		private void Button_Click_TracksPaste(object sender, RoutedEventArgs e)
+		{
+			TextBoxTracksFrom.Text = Clipboard.GetText();
+		}
+
+		private void TextBoxTracksFrom_TextChanged(object sender, TextChangedEventArgs e)
+		{
+			var text = (sender as TextBox)?.Text;
+			if (text is null) return;
+
+			foreach (var entry in RegexEntries)
+			{
+				text = System.Text.RegularExpressions.Regex.Replace(text, entry.RegexFrom, entry.RegexTo, System.Text.RegularExpressions.RegexOptions.Multiline);
+			}
+			TextBoxTracksTo.Text = text;
+		}
+
+		private void ImagePreview_Drop(object sender, DragEventArgs e)
+		{
+			if (e.Data is not DataObject dataobject) return;
+			var files = dataobject.GetFileDropList();
+
+			foreach (var item in files)
+			{
+				try
+				{
+					if (item is null) continue;
+
+					var dir = System.IO.Path.GetDirectoryName(item);
+					string resultPath = System.IO.Path.Combine(dir ?? "", System.IO.Path.GetFileNameWithoutExtension(item) + ".resized.jpeg");
+
+					var src = new System.Drawing.Bitmap(item);
+					var scale = Math.Min(1000.0 / src.Width, 1000.0 / src.Height);
+					if (scale > 1.0) {
+						src.Save(resultPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+						continue;
+					}
+					var dest = new System.Drawing.Bitmap((int)(src.Width * scale), (int)(src.Height * scale));
+					var g = System.Drawing.Graphics.FromImage(dest);
+					g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.High;
+					g.DrawImage(src, 0, 0, dest.Width, dest.Height);
+					var enc = System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().FirstOrDefault(a => a.FormatID == System.Drawing.Imaging.ImageFormat.Jpeg.Guid);
+					if (enc is null)
+					{
+						dest.Save(resultPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+					}
+					else
+					{
+						var epara = new System.Drawing.Imaging.EncoderParameters(1);
+						epara.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)70);
+						dest.Save(resultPath, enc, epara);
+					}
+
+					//if (!Aspose.Imaging.Image.CanLoad(item)) continue;
+					//using var image = Aspose.Imaging.Image.Load(item);
+					//var scale = Math.Min(1000.0 / image.Width, 1000.0 / image.Height);
+					//if (scale < 1) image.Resize((int)(image.Width * scale), (int)(image.Height * scale));
+					//var dir = System.IO.Path.GetDirectoryName(item);
+					//string resultPath;
+					//resultPath = System.IO.Path.Combine(dir ?? "", System.IO.Path.GetFileNameWithoutExtension(item) + ".resized.jpeg");
+					//image.Save(resultPath);
+				}
+				catch { }
+			}
+		}
+
+		private async void Button_Click_PasteUrl(object sender, RoutedEventArgs e)
+		{
+			TextBoxImageUrl.Text = Clipboard.GetText();
+			await DownloadImageCache();
 		}
 	}
 }

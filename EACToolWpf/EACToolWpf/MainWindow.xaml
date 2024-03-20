@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EACToolWpf"
-        mc:Ignorable="d" x:Name="WindowTop"
-        Title="MainWindow" Height="450" Width="800">
+        mc:Ignorable="d" x:Name="WindowTop" Closing="WindowTop_Closing"
+        Title="EACヘルパー" Height="450" Width="800">
     <TabControl>
-        <TabItem Header="画像">
+        <TabItem Header="画像" AllowDrop="True" Drop="ImagePreview_Drop">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -17,14 +17,20 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+
                 </Grid.ColumnDefinitions>
 
-                <Image x:Name="ImagePreview" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" MouseMove="ImagePreview_MouseMove" />
+                <Image x:Name="ImagePreview" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" MouseMove="ImagePreview_MouseMove"
+                       HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                       AllowDrop="True" Drop="ImagePreview_Drop"
+                       />
 
                 <TextBox x:Name="TextBoxImageUrl" Grid.Row="1" Grid.Column="0" KeyDown="TextBox_KeyDown" />
-                <Button Grid.Row="1" Grid.Column="1" Content="更新" Click="Button_Click" />
+                <Button Grid.Row="1" Grid.Column="1" Content="貼付" Click="Button_Click_PasteUrl"/>
+                <Button Grid.Row="1" Grid.Column="2" Content="更新" Click="Button_Click" />
 
-                <StackPanel Grid.Row="2" Grid.Column="0" Orientation="Horizontal">
+                <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Orientation="Horizontal">
                     <Button Content="保存" Click="Button_Click_SaveImage" />
                     <Button Content="Img保存" Click="Button_Click_CreateImg" />
                     <Button Content="ダウンロードを開く" Click="Button_Click_OpenDownload" />
@@ -32,7 +38,47 @@
             </Grid>
         </TabItem>
         <TabItem Header="トラック一覧">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1*" />
+                </Grid.ColumnDefinitions>
 
+                <StackPanel Orientation="Horizontal"  Grid.ColumnSpan="2">
+                    <Button Click="Button_Click_TracksPaste" Content="貼付" />
+                </StackPanel>
+
+                <TextBox x:Name="TextBoxTracksFrom" Grid.Row="1" Grid.Column="0" TextChanged="TextBoxTracksFrom_TextChanged" AcceptsReturn="True" AcceptsTab="True"/>
+                <TextBox x:Name="TextBoxTracksTo" Grid.Row="1" Grid.Column="1" AcceptsReturn="True" AcceptsTab="True"/>
+            </Grid>
         </TabItem>
+        <TabItem Header="一時メモ">
+            <TextBox AcceptsReturn="True" AcceptsTab="True" />
+        </TabItem>
+
+        <!--<TabItem Header="情報">
+            <TextBox IsReadOnly="True" AcceptsReturn="True">
+                <TextBox.Text>
+                    <![CDATA[サードパーティー情報
+
+Imazen.WebP
+https://github.com/imazen/libwebp-net
+Copyright (c) 2012 Imazen
+
+Vanara
+https://github.com/dahall/vanara
+Copyright (c) 2017 David Hall
+                
+.NET and related
+https://github.com/dotnet/
+Copyright (c) .NET Foundation and Contributors
+                ]]>
+                </TextBox.Text>
+            </TextBox>
+        </TabItem>-->
     </TabControl>
 </Window>
