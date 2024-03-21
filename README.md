@@ -1,6 +1,16 @@
 # EAC Tool
 高機能リッピングツール、EAC (Exact Audio Copy)に対する補助ツール。
 
+# For those who can't read above
+This tool is a tiny helper for Exact Audio Copy. This is my personal tool and not yet translated but it wouldn't be hard for me if you want.
+
+Functions
+* Type url of image and then drag it to set cover image (support webp).
+* Drop large image to make smaller jpeg (1000x1000 max).
+* Paste track names from the internet. It convert it and you copy it then Ctrl+Shift+V.
+* Make files like "Error.01.txt". Drag and drop if you don't get it.
+* Just a text box for your covinience.
+
 # 機能
 * URLによる画像ダウンロード→カバーにドロップ
 * ドロップした画像を自動でリサイズ&JPEG保存
