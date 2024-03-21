@@ -13,6 +13,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using System.Linq;
+using Vanara.PInvoke;
+
 namespace EACToolWpf
 {
 	/// <summary>
@@ -23,15 +26,29 @@ namespace EACToolWpf
 		private static readonly HttpClient httpClient = new();
 
 		public RegexEntry[] RegexEntries { get; set; } = [
-			new RegexEntry(@"^(\d+)[\s\t]*[\.．]?[\s\t]*",""),
-			new RegexEntry(@"[\s\t]*$",""),
+			new RegexEntry(@"^[\s\t　]*(\d+)[\s\t　]*[\.．]?[\s\t　]*",""),
+			new RegexEntry(@"[\s\t　]*$",""),
+			new RegexEntry(@"^[\s\t　]+",""),
 			new RegexEntry(@"\(\d+\)","\n"),
+			new RegexEntry(@"\n{2,}","\n"),
 		];
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			CurrentTempPath = System.IO.Path.GetTempFileName() + ".jpeg";
+			CurrentTempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.IO.Path.GetRandomFileName() + ".jpeg");
+			ErrorTempPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), System.IO.Path.GetRandomFileName());
+
+			for (int i = 1; i <= 50; i++)
+			{
+				var fn = $"Error.{i:00}.txt";
+				var cb = new CheckBox()
+				{
+					Content = fn,
+					Tag = fn,
+				};
+				StackPanelErrorFiles.Children.Add(cb);
+			}
 		}
 
 		private async void TextBox_KeyDown(object sender, KeyEventArgs e)
@@ -111,7 +128,9 @@ namespace EACToolWpf
 		byte[]? CurrentImageRaw = null;
 		byte[]? CurrentImageJpeg = null;
 		string? CurrentImageRawExt = null;
-		string? CurrentTempPath = null;
+		string CurrentTempPath;
+
+		string ErrorTempPath;
 
 		void ShowImage()
 		{
@@ -175,7 +194,7 @@ namespace EACToolWpf
 			if (CurrentImageRaw is null) return;
 			if (CurrentTempPath is null) return;
 			var img = sender as Image;
-			if (img is null || e.LeftButton != MouseButtonState.Pressed) return;
+			if (img is null || e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) return;
 			var dataobject = new DataObject(DataFormats.FileDrop, new[] { CurrentTempPath });
 			DragDrop.DoDragDrop(img, dataobject, DragDropEffects.Copy);
 		}
@@ -218,7 +237,8 @@ namespace EACToolWpf
 
 					var src = new System.Drawing.Bitmap(item);
 					var scale = Math.Min(1000.0 / src.Width, 1000.0 / src.Height);
-					if (scale > 1.0) {
+					if (scale > 1.0)
+					{
 						src.Save(resultPath, System.Drawing.Imaging.ImageFormat.Jpeg);
 						continue;
 					}
@@ -253,8 +273,91 @@ namespace EACToolWpf
 
 		private async void Button_Click_PasteUrl(object sender, RoutedEventArgs e)
 		{
-			TextBoxImageUrl.Text = Clipboard.GetText();
-			await DownloadImageCache();
+			try
+			{
+				TextBoxImageUrl.Text = Clipboard.GetText();
+				await DownloadImageCache();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"貼り付けに失敗。\n{ex}", "失敗");
+			}
+
+		}
+
+		private void Button_Click_TrackCopy(object sender, RoutedEventArgs e)
+		{
+			try
+			{
+				Clipboard.SetText(TextBoxTracksTo.Text);
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show($"コピーに失敗。\n{ex}", "失敗");
+			}
+		}
+
+		private void Button_Click_Pattern1(object sender, RoutedEventArgs e)
+		{
+			var text = TextBoxTracksFrom.Text;
+			var result = new StringBuilder();
+			var sb = new StringReader(text);
+			var reg1 = new System.Text.RegularExpressions.Regex(@"^[\s\t　]*(\d+)[\s\t　]*[\.．]?[\s\t　]*");
+			var reg2 = new System.Text.RegularExpressions.Regex(@"[\s\t　]*$");
+			while (true)
+			{
+				var line = sb.ReadLine();
+				if (line is null) break;
+				if (reg1.IsMatch(line))
+				{
+					result.AppendLine(reg2.Replace(reg1.Replace(line, ""), ""));
+				}
+			}
+			TextBoxTracksTo.Text = result.ToString();
+		}
+
+		private void Button_Click_Hankaku(object sender, RoutedEventArgs e)
+		{
+			var text = TextBoxTracksFrom.Text;
+			var sb = new StringBuilder();
+			text = text.Replace("（", " (").Replace("）", ") ");
+			foreach (var t in text)
+			{
+				if (t >= '０' && t <= '９') sb.Append((char)(t - '０' + '0'));
+				else if (t >= 'ａ' && t <= 'ｚ') sb.Append((char)(t - 'ａ' + 'a'));
+				else if (t >= 'Ａ' && t <= 'Ｚ') sb.Append((char)(t - 'Ａ' + 'A'));
+				else sb.Append(t);
+			}
+			TextBoxTracksTo.Text = sb.ToString();
+		}
+
+		private void Rectangle_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			var rect = sender as Rectangle;
+			if (rect is null) return;
+
+			if (!Directory.Exists(ErrorTempPath)) Directory.CreateDirectory(ErrorTempPath);
+			List<string> files = new List<string>();
+			foreach (var item in StackPanelErrorFiles.Children)
+			{
+				if (item is not CheckBox cb) continue;
+				if (cb.IsChecked != true) continue;
+				var fn = System.IO.Path.Combine(ErrorTempPath, ((string)cb.Tag));
+				files.Add(fn);
+				if (!File.Exists(fn)) { using var _ = System.IO.File.Create(fn); }
+			}
+			if (files.Count == 0) return;
+			var dataobject = new DataObject(DataFormats.FileDrop, files.ToArray());
+			DragDrop.DoDragDrop(rect, dataobject, DragDropEffects.Copy);
+		}
+
+		private void Button_Click_ClearCheckboxError(object sender, RoutedEventArgs e)
+		{
+			foreach (var item in StackPanelErrorFiles.Children)
+			{
+				if (item is not CheckBox cb) continue;
+				cb.IsChecked = false;
+			}
 		}
 	}
 }

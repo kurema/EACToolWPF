@@ -50,15 +50,39 @@
 
                 <StackPanel Orientation="Horizontal"  Grid.ColumnSpan="2">
                     <Button Click="Button_Click_TracksPaste" Content="貼付" />
+                    <Button Click="Button_Click_TrackCopy"  Content="コピー" />
+                    <Button Click="Button_Click_Hankaku" Content="半角化" />
+                    <Button Click="Button_Click_Pattern1"  Content="パターンA" />
                 </StackPanel>
 
                 <TextBox x:Name="TextBoxTracksFrom" Grid.Row="1" Grid.Column="0" TextChanged="TextBoxTracksFrom_TextChanged" AcceptsReturn="True" AcceptsTab="True"/>
                 <TextBox x:Name="TextBoxTracksTo" Grid.Row="1" Grid.Column="1" AcceptsReturn="True" AcceptsTab="True"/>
             </Grid>
         </TabItem>
+
+        <TabItem Header="エラー">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Rectangle Height="50" Fill="Beige" MouseDown="Rectangle_MouseDown"/>
+                <StackPanel Orientation="Horizontal" Grid.Row="1">
+                    <Button Content="クリア" Click="Button_Click_ClearCheckboxError"/>
+                </StackPanel>
+                <ScrollViewer Grid.Row="2">
+                    <StackPanel x:Name="StackPanelErrorFiles">
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </TabItem>
+
         <TabItem Header="一時メモ">
             <TextBox AcceptsReturn="True" AcceptsTab="True" />
         </TabItem>
+
 
         <!--<TabItem Header="情報">
             <TextBox IsReadOnly="True" AcceptsReturn="True">
