@@ -26,7 +26,7 @@ namespace EACToolWpf
 		private static readonly HttpClient httpClient = new();
 
 		public RegexEntry[] RegexEntries { get; set; } = [
-			new RegexEntry(@"^[\s\t　]*(\d+)[\s\t　]*[\.．]?[\s\t　]*",""),
+			new RegexEntry(@"^[\s\t　]*(\d+)[\s\t　]*[\.．:：]?[\s\t　]*",""),
 			new RegexEntry(@"[\s\t　]*$",""),
 			new RegexEntry(@"^[\s\t　]+",""),
 			new RegexEntry(@"\(\d+\)","\n"),

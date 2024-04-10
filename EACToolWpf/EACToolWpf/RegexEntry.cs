@@ -12,7 +12,7 @@ namespace EACToolWpf
 		{
 		}
 
-		public RegexEntry(string regexFrom, string regexTo)
+		public RegexEntry([System.Diagnostics.CodeAnalysis.StringSyntax(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute.Regex)] string regexFrom, string regexTo)
 		{
 			RegexFrom = regexFrom ?? throw new ArgumentNullException(nameof(regexFrom));
 			RegexTo = regexTo ?? throw new ArgumentNullException(nameof(regexTo));
