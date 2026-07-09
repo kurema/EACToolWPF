@@ -34,6 +34,9 @@
                     <Button Content="保存" Click="Button_Click_SaveImage" />
                     <Button Content="Img保存" Click="Button_Click_CreateImg" />
                     <Button Content="ダウンロードを開く" Click="Button_Click_OpenDownload" />
+                    <Button Content="EACを開く" Click="Button_Click_OpenEAC" Margin="10,0,0,0" />
+                    <Button Content="CUEToolsを開く" Click="Button_Click_OpenCueTools" />
+
                 </StackPanel>
             </Grid>
         </TabItem>
